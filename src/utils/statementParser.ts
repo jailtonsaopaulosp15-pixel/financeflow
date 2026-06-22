@@ -78,7 +78,14 @@ export async function extractPdfLines(file: File): Promise<string[]> {
     const sortedKeys = Array.from(lineMap.keys()).sort((a, b) => b - a)
     for (const key of sortedKeys) {
       const lineItems = lineMap.get(key)!.sort((a, b) => a.x - b.x)
-      const text = lineItems.map((i) => i.str).join(' ').replace(/\s+/g, ' ').trim()
+      // Alguns PDFs (ex: extratos Neon) inserem caracteres de controle (NUL etc.)
+      // no lugar de espaços reais entre colunas — normaliza para espaço antes do trim.
+      const text = lineItems
+        .map((i) => i.str)
+        .join(' ')
+        .replace(/[\x00-\x1F\x7F]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
       if (text) allLines.push(text)
     }
   }
