@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { TrendingUp, TrendingDown, ArrowRight, CheckCircle2, AlertTriangle } from 'lucide-react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useAuth } from '../hooks/useAuth'
 import { useTransactions } from '../hooks/useTransactions'
+import { useAppStore } from '../store/appStore'
 import { formatCurrency, getMonthlyData } from '../utils/finance'
 import { format, startOfMonth, endOfMonth, isToday } from 'date-fns'
 
@@ -15,6 +16,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 export const DashboardPage = () => {
   const { user } = useAuth()
+  const { theme } = useAppStore()
   const { transactions } = useTransactions(user?.uid || null)
   const [stats, setStats] = useState({
     currentBalance: 0,
@@ -199,25 +201,53 @@ export const DashboardPage = () => {
         {/* Line chart */}
         <div className="card p-6">
           <h2 className="text-lg font-bold text-primary mb-6">Evolução do Saldo</h2>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px', color: '#fff' }}
-              />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="balance"
-                stroke="#9333ea"
-                strokeWidth={2}
-                dot={{ fill: '#9333ea', r: 5 }}
-                activeDot={{ r: 7 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {monthlyData.length >= 2 ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={monthlyData} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke={theme === 'dark' ? '#374151' : '#e5e7eb'}
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fill: theme === 'dark' ? '#9ca3af' : '#6b7280', fontSize: 12 }}
+                  axisLine={{ stroke: theme === 'dark' ? '#374151' : '#e5e7eb' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: theme === 'dark' ? '#9ca3af' : '#6b7280', fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={56}
+                  tickFormatter={(v) => formatCurrency(v).replace('R$', '').trim()}
+                />
+                <Tooltip
+                  formatter={(value: number) => formatCurrency(value)}
+                  contentStyle={{
+                    backgroundColor: theme === 'dark' ? '#1f2937' : '#fff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: theme === 'dark' ? '#fff' : '#111827',
+                  }}
+                  labelStyle={{ color: theme === 'dark' ? '#fff' : '#111827' }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="balance"
+                  name="Saldo"
+                  stroke="#9333ea"
+                  strokeWidth={2}
+                  dot={{ fill: '#9333ea', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-40 flex items-center justify-center text-sm text-secondary text-center px-6">
+              Adicione transações em datas diferentes para ver a evolução do saldo aqui.
+            </div>
+          )}
         </div>
 
         {/* Recent transactions */}

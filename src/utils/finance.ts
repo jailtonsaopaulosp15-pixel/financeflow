@@ -18,27 +18,37 @@ export const formatMonth = (date: Date): string => {
   return format(date, 'MMMM yyyy')
 }
 
+// Gera a evolução do saldo acumulado ao longo do tempo.
+// Agrupa por dia (não por mês) para que extratos concentrados em um único
+// mês ainda produzam uma linha com vários pontos, em vez de um ponto isolado.
 export const getMonthlyData = (transactions: Transaction[]) => {
-  const months: Record<string, { balance: number; income: number; expense: number }> = {}
+  if (transactions.length === 0) return []
 
-  transactions.forEach((transaction) => {
-    const monthKey = format(transaction.date, 'MMM')
-    if (!months[monthKey]) {
-      months[monthKey] = { balance: 0, income: 0, expense: 0 }
-    }
+  const sorted = [...transactions].sort((a, b) => a.date.getTime() - b.date.getTime())
 
-    if (transaction.type === 'income') {
-      months[monthKey].income += transaction.amount
-    } else {
-      months[monthKey].expense += transaction.amount
+  const dayMap = new Map<string, { dayKey: string; income: number; expense: number; lastDate: Date }>()
+
+  sorted.forEach((transaction) => {
+    const dayKey = format(transaction.date, 'dd/MM')
+    if (!dayMap.has(dayKey)) {
+      dayMap.set(dayKey, { dayKey, income: 0, expense: 0, lastDate: transaction.date })
     }
-    months[monthKey].balance = months[monthKey].income - months[monthKey].expense
+    const entry = dayMap.get(dayKey)!
+    if (transaction.type === 'income') entry.income += transaction.amount
+    else entry.expense += transaction.amount
+    entry.lastDate = transaction.date
   })
 
-  return Object.keys(months).map((month) => ({
-    month,
-    ...months[month],
-  }))
+  let running = 0
+  return Array.from(dayMap.values()).map((entry) => {
+    running += entry.income - entry.expense
+    return {
+      month: entry.dayKey,
+      balance: Math.round(running * 100) / 100,
+      income: entry.income,
+      expense: entry.expense,
+    }
+  })
 }
 
 export const getCategoryBreakdown = (transactions: Transaction[]) => {
