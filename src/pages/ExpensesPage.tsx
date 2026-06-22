@@ -5,6 +5,8 @@ import { useAuth } from '../hooks/useAuth'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useAppStore } from '../store/appStore'
+import { usePagination } from '../hooks/usePagination'
+import { Pagination } from '../components/Pagination'
 import { Transaction } from '../types'
 
 const formatCurrency = (value: number) =>
@@ -52,6 +54,10 @@ export const ExpensesPage = () => {
   }, [transactions, selectedMonth, selectedCategory])
 
   const total = filtered.reduce((sum, t) => sum + t.amount, 0)
+
+  const {
+    pageItems, page, totalPages, totalItems, pageSize, hasPrev, hasNext, prevPage, nextPage,
+  } = usePagination(filtered, 20, `${selectedMonth}-${selectedCategory}`)
 
   const startEdit = (t: Transaction) => {
     setEditingId(t.id)
@@ -169,7 +175,7 @@ export const ExpensesPage = () => {
             </div>
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
-              {filtered.map((t) => (
+              {pageItems.map((t) => (
                 <div key={t.id} className="p-4">
                   {editingId === t.id ? (
                     <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
@@ -256,6 +262,16 @@ export const ExpensesPage = () => {
               ))}
             </div>
           )}
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            hasPrev={hasPrev}
+            hasNext={hasNext}
+            onPrev={prevPage}
+            onNext={nextPage}
+          />
         </div>
       </div>
     </div>
