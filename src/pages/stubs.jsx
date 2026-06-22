@@ -56,25 +56,3 @@ export const ReportsPage = () => {
     </div>
   )
 }
-
-// Settings Page
-export const SettingsPage = () => {
-  const { user } = useAuth()
-  
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="page-header bg-gradient-to-r from-purple-600 to-purple-800 text-white rounded-b-3xl">
-        <h1 className="text-3xl font-bold">Configurações</h1>
-        <p className="text-purple-100">Gerencie sua conta</p>
-      </div>
-      <div className="page-content">
-        <div className="card p-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400">Página de Configurações - Em desenvolvimento</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-            Nome do usuário: {user?.displayName || user?.email}
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}

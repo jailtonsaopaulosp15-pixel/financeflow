@@ -128,6 +128,22 @@ export const useAuth = () => {
     }
   }
 
+  const updateUserName = async (displayName: string) => {
+    try {
+      setError(null)
+      if (!auth.currentUser) throw new Error('Usuário não autenticado')
+
+      await updateProfile(auth.currentUser, { displayName })
+      await setDoc(doc(db, 'users', auth.currentUser.uid), { displayName }, { merge: true })
+
+      setUser((prev) => (prev ? { ...prev, displayName } : prev))
+    } catch (err) {
+      const errorMessage = getAuthErrorMessage(err)
+      setError(errorMessage)
+      throw err
+    }
+  }
+
   return {
     user,
     loading,
@@ -136,6 +152,7 @@ export const useAuth = () => {
     login,
     logout,
     resetPassword,
+    updateUserName,
     isAuthenticated: !!user
   }
 }
