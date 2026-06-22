@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Moon, Sun } from 'lucide-react'
+import { Moon, Sun, Upload } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useAppStore } from '../store/appStore'
 
@@ -20,6 +20,14 @@ export const Header = () => {
         </Link>
 
         <div className="flex items-center gap-2">
+          <Link
+            to="/import"
+            className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            aria-label="Importar extrato"
+            title="Importar extrato"
+          >
+            <Upload size={16} />
+          </Link>
           <button
             onClick={toggleTheme}
             className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"

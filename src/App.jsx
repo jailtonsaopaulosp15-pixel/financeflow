@@ -19,6 +19,7 @@ const ExpensesPage = lazy(() => import('./pages/ExpensesPage').then(m => ({ defa
 const ReportsPage = lazy(() => import('./pages/stubs').then(m => ({ default: m.ReportsPage })))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
 const AddTransactionPage = lazy(() => import('./pages/AddTransactionPage').then(m => ({ default: m.AddTransactionPage })))
+const ImportStatementPage = lazy(() => import('./pages/ImportStatementPage').then(m => ({ default: m.ImportStatementPage })))
 
 function PageLoader() {
   return (
@@ -94,6 +95,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <SettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/import"
+              element={
+                <ProtectedRoute>
+                  <ImportStatementPage />
                 </ProtectedRoute>
               }
             />
