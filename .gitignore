@@ -42,3 +42,5 @@ out
 # OS
 .DS_Store
 Thumbs.db
+*.tmp
+_stubs.unused

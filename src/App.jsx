@@ -16,7 +16,7 @@ const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default:
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
 const IncomesPage = lazy(() => import('./pages/IncomesPage').then(m => ({ default: m.IncomesPage })))
 const ExpensesPage = lazy(() => import('./pages/ExpensesPage').then(m => ({ default: m.ExpensesPage })))
-const ReportsPage = lazy(() => import('./pages/stubs').then(m => ({ default: m.ReportsPage })))
+const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ default: m.ReportsPage })))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
 const AddTransactionPage = lazy(() => import('./pages/AddTransactionPage').then(m => ({ default: m.AddTransactionPage })))
 const ImportStatementPage = lazy(() => import('./pages/ImportStatementPage').then(m => ({ default: m.ImportStatementPage })))
