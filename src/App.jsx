@@ -13,6 +13,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 // Pages (lazy-loaded so each route is its own chunk, shrinking the initial bundle)
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
 const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })))
+const RecoverPasswordPage = lazy(() => import('./pages/RecoverPasswordPage').then(m => ({ default: m.RecoverPasswordPage })))
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
 const IncomesPage = lazy(() => import('./pages/IncomesPage').then(m => ({ default: m.IncomesPage })))
 const ExpensesPage = lazy(() => import('./pages/ExpensesPage').then(m => ({ default: m.ExpensesPage })))
@@ -48,6 +49,7 @@ function AppContent() {
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/recover-password" element={<RecoverPasswordPage />} />
 
             {/* Protected Routes */}
             <Route

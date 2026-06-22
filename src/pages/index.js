@@ -1,5 +1,6 @@
 export { DashboardPage } from './DashboardPage'
 export { LoginPage } from './LoginPage'
+export { RecoverPasswordPage } from './RecoverPasswordPage'
 export { SignupPage } from './SignupPage'
 export { AddTransactionPage } from './AddTransactionPage'
 export { SettingsPage } from './SettingsPage'
