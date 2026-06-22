@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut,
   sendPasswordResetEmail,
   onAuthStateChanged,
@@ -103,6 +105,42 @@ export const useAuth = () => {
     }
   }
 
+  const loginWithGoogle = async () => {
+    try {
+      setError(null)
+      const provider = new GoogleAuthProvider()
+      const result = await signInWithPopup(auth, provider)
+
+      const userRef = doc(db, 'users', result.user.uid)
+      const userData = await getDoc(userRef)
+
+      if (!userData.exists()) {
+        // Primeiro login com Google: cria o documento do usuário e categorias padrão
+        await setDoc(userRef, {
+          email: result.user.email,
+          displayName: result.user.displayName || '',
+          photoURL: result.user.photoURL || null,
+          createdAt: new Date(),
+          lastLogin: new Date()
+        })
+        await createDefaultCategories(result.user.uid)
+      } else {
+        await setDoc(userRef, { lastLogin: new Date() }, { merge: true })
+      }
+
+      navigate('/dashboard')
+      return result.user
+    } catch (err: any) {
+      // Usuário fechou o popup — não é um erro real, não precisa exibir mensagem
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        return
+      }
+      const errorMessage = getAuthErrorMessage(err)
+      setError(errorMessage)
+      throw err
+    }
+  }
+
   const logout = async () => {
     try {
       setError(null)
@@ -150,6 +188,7 @@ export const useAuth = () => {
     error,
     signup,
     login,
+    loginWithGoogle,
     logout,
     resetPassword,
     updateUserName,
@@ -171,6 +210,8 @@ const getAuthErrorMessage = (error: any): string => {
     'auth/wrong-password': 'Senha incorreta',
     'auth/invalid-credential': 'Credenciais inválidas',
     'auth/too-many-requests': 'Muitas tentativas de login. Tente novamente mais tarde',
+    'auth/popup-blocked': 'O popup de login foi bloqueado pelo navegador. Permita popups e tente novamente',
+    'auth/account-exists-with-different-credential': 'Já existe uma conta com este e-mail usando outro método de login',
   }
 
   return errorMessages[errorCode] || 'Erro ao processar requisição'

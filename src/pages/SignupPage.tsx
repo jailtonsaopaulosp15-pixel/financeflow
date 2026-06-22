@@ -14,7 +14,8 @@ export const SignupPage = () => {
   const [loading, setLoading] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
-  const { user, error: authError, signup } = useAuth()
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const { user, error: authError, signup, loginWithGoogle } = useAuth()
   const { addNotification } = useAppStore()
 
   if (user) {
@@ -63,6 +64,21 @@ export const SignupPage = () => {
     }
 
     return true
+  }
+
+  const handleGoogleSignup = async () => {
+    setGoogleLoading(true)
+    setLocalError(null)
+    try {
+      const result = await loginWithGoogle()
+      if (result) addNotification('success', 'Conta criada com sucesso!')
+    } catch (err) {
+      const errorMessage = authError || 'Erro ao entrar com Google'
+      setLocalError(errorMessage)
+      addNotification('error', errorMessage)
+    } finally {
+      setGoogleLoading(false)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -240,6 +256,33 @@ export const SignupPage = () => {
           >
             {loading && <Loader size={20} className="animate-spin" />}
             {loading ? 'Criando conta...' : 'Criar conta'}
+          </button>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+            <span className="text-sm text-gray-500 dark:text-gray-400">ou</span>
+            <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+          </div>
+
+          {/* Google Sign-Up */}
+          <button
+            type="button"
+            onClick={handleGoogleSignup}
+            disabled={googleLoading}
+            className="w-full py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-3 disabled:opacity-60"
+          >
+            {googleLoading ? (
+              <Loader size={20} className="animate-spin" />
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 48 48">
+                <path fill="#FFC107" d="M43.6 20.5h-1.9V20.5H24v7.5h11.3c-1.6 4.5-5.9 7.5-11.3 7.5-6.9 0-12.5-5.6-12.5-12.5S17.1 10.5 24 10.5c3.2 0 6.1 1.2 8.3 3.2l5.3-5.3C34.4 5.4 29.5 3.5 24 3.5 12.7 3.5 3.5 12.7 3.5 24S12.7 44.5 24 44.5 44.5 35.3 44.5 24c0-1.2-.1-2.4-.3-3.5z"/>
+                <path fill="#FF3D00" d="M6.3 14.7l6.2 4.5C14 15.1 18.6 12.5 24 12.5c3.2 0 6.1 1.2 8.3 3.2l5.3-5.3C34.4 7.4 29.5 5.5 24 5.5c-7.6 0-14.1 4.3-17.7 10.6z"/>
+                <path fill="#4CAF50" d="M24 44.5c5.4 0 10.2-1.8 13.9-4.9l-6.4-5.4c-2 1.4-4.6 2.3-7.5 2.3-5.4 0-9.7-3-11.3-7.5l-6.4 4.9C9.9 40.2 16.4 44.5 24 44.5z"/>
+                <path fill="#1976D2" d="M43.6 20.5H24v7.5h11.3c-.8 2.2-2.2 4.1-4.1 5.4l6.4 5.4C41.4 35.6 44.5 30.3 44.5 24c0-1.2-.1-2.4-.9-3.5z"/>
+              </svg>
+            )}
+            {googleLoading ? 'Criando conta...' : 'Continuar com Google'}
           </button>
 
           {/* Divider */}
