@@ -4,7 +4,7 @@ import { useAppStore } from './store/appStore'
 import { useAuth } from './hooks/useAuth'
 
 // Components
-import { Sidebar } from './components/Sidebar'
+import { Header } from './components/Header'
 import { BottomNav } from './components/BottomNav'
 import { FloatingActionButton } from './components/FloatingActionButton'
 import { NotificationCenter } from './components/NotificationCenter'
@@ -36,12 +36,12 @@ function AppContent() {
 
   return (
     <div className={theme === 'dark' ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white">
-        {/* Sidebar for authenticated users */}
-        {user && !isAuthPage && <Sidebar />}
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
+        {/* Light top header for authenticated users */}
+        {user && !isAuthPage && <Header />}
 
         {/* Main Content */}
-        <main className={`transition-all duration-300 ${user && !isAuthPage ? 'md:ml-64 pb-20 md:pb-0' : ''}`}>
+        <main className={`max-w-2xl mx-auto ${user && !isAuthPage ? 'pb-24' : ''}`}>
           <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public Routes */}
@@ -105,7 +105,7 @@ function AppContent() {
           </Suspense>
         </main>
 
-        {/* Mobile-only bottom navigation and quick-add button */}
+        {/* Bottom navigation and quick-add button */}
         {user && !isAuthPage && <BottomNav />}
         {user && !isAuthPage && <FloatingActionButton />}
 

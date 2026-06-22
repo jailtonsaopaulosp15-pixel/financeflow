@@ -13,8 +13,8 @@ export const BottomNav = () => {
   const location = useLocation()
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 pb-[env(safe-area-inset-bottom)]">
-      <ul className="flex items-stretch justify-around">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 pb-[env(safe-area-inset-bottom)]">
+      <ul className="max-w-2xl mx-auto flex items-stretch justify-around">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = location.pathname === item.path
