@@ -1,0 +1,5 @@
+export { DashboardPage } from './DashboardPage'
+export { LoginPage } from './LoginPage'
+export { SignupPage } from './SignupPage'
+export { AddTransactionPage } from './AddTransactionPage'
+export { IncomesPage, ExpensesPage, ReportsPage, SettingsPage } from './stubs'
