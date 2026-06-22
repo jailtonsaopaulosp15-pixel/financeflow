@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAppStore } from './store/appStore'
 import { useAuth } from './hooks/useAuth'
@@ -7,12 +8,23 @@ import { Sidebar } from './components/Sidebar'
 import { NotificationCenter } from './components/NotificationCenter'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
-// Pages
-import { LoginPage } from './pages/LoginPage'
-import { SignupPage } from './pages/SignupPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { IncomesPage, ExpensesPage, ReportsPage, SettingsPage } from './pages/stubs'
-import { AddTransactionPage } from './pages/AddTransactionPage'
+// Pages (lazy-loaded so each route is its own chunk, shrinking the initial bundle)
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
+const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })))
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
+const IncomesPage = lazy(() => import('./pages/stubs').then(m => ({ default: m.IncomesPage })))
+const ExpensesPage = lazy(() => import('./pages/stubs').then(m => ({ default: m.ExpensesPage })))
+const ReportsPage = lazy(() => import('./pages/stubs').then(m => ({ default: m.ReportsPage })))
+const SettingsPage = lazy(() => import('./pages/stubs').then(m => ({ default: m.SettingsPage })))
+const AddTransactionPage = lazy(() => import('./pages/AddTransactionPage').then(m => ({ default: m.AddTransactionPage })))
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-nubank-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
 
 function AppContent() {
   const { user } = useAuth()
@@ -28,6 +40,7 @@ function AppContent() {
 
         {/* Main Content */}
         <main className={`transition-all duration-300 ${user && !isAuthPage ? 'md:ml-64' : ''}`}>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -87,6 +100,7 @@ function AppContent() {
             <Route path="/" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
         </main>
 
         {/* Notification Center */}

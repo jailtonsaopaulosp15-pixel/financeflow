@@ -78,5 +78,16 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: false
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+          recharts: ['recharts'],
+          'export-tools': ['jspdf', 'xlsx'],
+        }
+      }
+    }
   }
 })
