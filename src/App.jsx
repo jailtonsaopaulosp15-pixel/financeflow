@@ -5,6 +5,8 @@ import { useAuth } from './hooks/useAuth'
 
 // Components
 import { Sidebar } from './components/Sidebar'
+import { BottomNav } from './components/BottomNav'
+import { FloatingActionButton } from './components/FloatingActionButton'
 import { NotificationCenter } from './components/NotificationCenter'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
@@ -12,8 +14,8 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
 const SignupPage = lazy(() => import('./pages/SignupPage').then(m => ({ default: m.SignupPage })))
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
-const IncomesPage = lazy(() => import('./pages/stubs').then(m => ({ default: m.IncomesPage })))
-const ExpensesPage = lazy(() => import('./pages/stubs').then(m => ({ default: m.ExpensesPage })))
+const IncomesPage = lazy(() => import('./pages/IncomesPage').then(m => ({ default: m.IncomesPage })))
+const ExpensesPage = lazy(() => import('./pages/ExpensesPage').then(m => ({ default: m.ExpensesPage })))
 const ReportsPage = lazy(() => import('./pages/stubs').then(m => ({ default: m.ReportsPage })))
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
 const AddTransactionPage = lazy(() => import('./pages/AddTransactionPage').then(m => ({ default: m.AddTransactionPage })))
@@ -39,7 +41,7 @@ function AppContent() {
         {user && !isAuthPage && <Sidebar />}
 
         {/* Main Content */}
-        <main className={`transition-all duration-300 ${user && !isAuthPage ? 'md:ml-64' : ''}`}>
+        <main className={`transition-all duration-300 ${user && !isAuthPage ? 'md:ml-64 pb-20 md:pb-0' : ''}`}>
           <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public Routes */}
@@ -102,6 +104,10 @@ function AppContent() {
           </Routes>
           </Suspense>
         </main>
+
+        {/* Mobile-only bottom navigation and quick-add button */}
+        {user && !isAuthPage && <BottomNav />}
+        {user && !isAuthPage && <FloatingActionButton />}
 
         {/* Notification Center */}
         <NotificationCenter />

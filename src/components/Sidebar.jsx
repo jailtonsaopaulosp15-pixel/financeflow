@@ -7,8 +7,6 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Menu,
-  X,
   Plus
 } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -17,7 +15,7 @@ import { useAppStore } from '../store/appStore'
 export const Sidebar = () => {
   const location = useLocation()
   const { user, logout } = useAuth()
-  const { sidebarOpen, toggleSidebar, theme, toggleTheme } = useAppStore()
+  const { theme, toggleTheme } = useAppStore()
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   const navItems = [
@@ -39,29 +37,11 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <button
-        onClick={toggleSidebar}
-        className="fixed top-4 left-4 z-50 md:hidden p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-shadow"
-      >
-        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-
-      {/* Overlay for mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={toggleSidebar}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside className={`
-        fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-gray-900 to-gray-800 
-        dark:from-gray-950 dark:to-gray-900 text-white z-40 transform transition-transform 
-        duration-300 ease-in-out overflow-y-auto scrollbar-hide
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-      `}>
+      {/* Sidebar (desktop only — mobile uses BottomNav) */}
+      <aside className="
+        hidden md:block fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-gray-900 to-gray-800
+        dark:from-gray-950 dark:to-gray-900 text-white z-40 overflow-y-auto scrollbar-hide
+      ">
         {/* Logo */}
         <div className="p-6 border-b border-gray-700">
           <div className="flex items-center gap-3">
@@ -94,7 +74,6 @@ export const Sidebar = () => {
                 <li key={item.path}>
                   <Link
                     to={item.path}
-                    onClick={() => window.innerWidth < 768 && toggleSidebar()}
                     className={`
                       flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
                       ${isActive
