@@ -11,10 +11,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { SignupPage } from './pages/SignupPage'
 import { DashboardPage } from './pages/DashboardPage'
-import { IncomesPage } from './pages/IncomesPage'
-import { ExpensesPage } from './pages/ExpensesPage'
-import { ReportsPage } from './pages/ReportsPage'
-import { SettingsPage } from './pages/SettingsPage'
+import { IncomesPage, ExpensesPage, ReportsPage, SettingsPage } from './pages/stubs'
 import { AddTransactionPage } from './pages/AddTransactionPage'
 
 function AppContent() {

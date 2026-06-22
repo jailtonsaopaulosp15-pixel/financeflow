@@ -118,7 +118,7 @@ export default {
         'blur-lg': 'blur(20px)',
       },
       transitionTimingFunction: {
-        'ease-smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
       },
     },
   },
