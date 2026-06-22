@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Download, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -32,6 +32,15 @@ export const ReportsPage = () => {
 
   const months = useMemo(monthOptions, [])
   const [selectedMonth, setSelectedMonth] = useState(months[0].value)
+
+  // Bug conhecido do recharts no Safari/iOS (especialmente em PWA instalado):
+  // o ResponsiveContainer mede 0x0 no primeiro layout e o gráfico fica em
+  // branco. Forçar um "resize" pouco depois do mount faz a lib remedir e
+  // renderizar corretamente.
+  useEffect(() => {
+    const id = setTimeout(() => window.dispatchEvent(new Event('resize')), 150)
+    return () => clearTimeout(id)
+  }, [])
 
   const monthlyTransactions = useMemo(
     () => transactions.filter((t) => monthKey(new Date(t.date)) === selectedMonth),
@@ -185,7 +194,7 @@ export const ReportsPage = () => {
             {/* Trend chart */}
             <div className="card p-6">
               <h2 className="text-lg font-bold text-primary mb-4">Receitas x Despesas (6 meses)</h2>
-              <ResponsiveContainer width="100%" height={260}>
+              <ResponsiveContainer width="100%" height={260} minWidth={0} minHeight={260}>
                 <BarChart data={trend} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#374151' : '#e5e7eb'} vertical={false} />
                   <XAxis
