@@ -203,7 +203,7 @@ export const DashboardPage = () => {
           <h2 className="text-lg font-bold text-primary mb-6">Evolução do Saldo</h2>
           {monthlyData.length >= 2 ? (
             <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={monthlyData} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
+              <LineChart data={monthlyData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke={theme === 'dark' ? '#374151' : '#e5e7eb'}
@@ -219,8 +219,12 @@ export const DashboardPage = () => {
                   tick={{ fill: theme === 'dark' ? '#9ca3af' : '#6b7280', fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
-                  width={56}
-                  tickFormatter={(v) => formatCurrency(v).replace('R$', '').trim()}
+                  width={68}
+                  tickFormatter={(v) =>
+                    Math.abs(v) >= 1000
+                      ? `${(v / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}k`
+                      : v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })
+                  }
                 />
                 <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
