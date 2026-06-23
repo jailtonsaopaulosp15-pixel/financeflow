@@ -12,7 +12,7 @@ import {
   updateProfile,
   User as FirebaseUser
 } from 'firebase/auth'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { doc, setDoc, getDoc, onSnapshot, Timestamp } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
 import { User } from '../types'
 
@@ -22,39 +22,83 @@ import { User } from '../types'
 // useAuth() simultaneamente quando a página carrega).
 let redirectResultProcessed = false
 
+// Pede ao backend (Netlify Function + Firebase Admin) para iniciar o
+// período de teste grátis de 7 dias. É idempotente no servidor, então é
+// seguro chamar sempre que criamos a conta do usuário.
+const startTrial = async (firebaseUser: FirebaseUser) => {
+  try {
+    const idToken = await firebaseUser.getIdToken()
+    await fetch('/.netlify/functions/start-trial', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${idToken}` },
+    })
+  } catch (err) {
+    console.error('Erro ao iniciar trial:', err)
+  }
+}
+
+const toDate = (value: any): Date | undefined => {
+  if (!value) return undefined
+  if (value instanceof Timestamp) return value.toDate()
+  if (value instanceof Date) return value
+  return new Date(value)
+}
+
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  // Monitor auth state changes
+  // Monitor auth state changes. Usamos onSnapshot (em vez de getDoc único)
+  // no documento do usuário pra refletir em tempo real mudanças vindas do
+  // backend — por exemplo, quando o webhook do Mercado Pago atualiza
+  // subscriptionStatus depois que o usuário autoriza o pagamento.
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      try {
-        if (firebaseUser) {
-          const userData = await getDoc(doc(db, 'users', firebaseUser.uid))
-          if (userData.exists()) {
+    let unsubscribeDoc: (() => void) | undefined
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      if (unsubscribeDoc) {
+        unsubscribeDoc()
+        unsubscribeDoc = undefined
+      }
+
+      if (!firebaseUser) {
+        setUser(null)
+        setLoading(false)
+        return
+      }
+
+      unsubscribeDoc = onSnapshot(
+        doc(db, 'users', firebaseUser.uid),
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data()
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email || '',
               displayName: firebaseUser.displayName || '',
               photoURL: firebaseUser.photoURL || '',
-              createdAt: new Date(firebaseUser.metadata.creationTime || Date.now())
+              createdAt: new Date(firebaseUser.metadata.creationTime || Date.now()),
+              subscriptionStatus: data.subscriptionStatus,
+              trialEndsAt: toDate(data.trialEndsAt),
+              mpPreapprovalId: data.mpPreapprovalId,
             })
           }
-        } else {
-          setUser(null)
+          setLoading(false)
+        },
+        (err) => {
+          console.error('Error loading user:', err)
+          setError(err instanceof Error ? err.message : 'Erro ao carregar usuário')
+          setLoading(false)
         }
-      } catch (err) {
-        console.error('Error loading user:', err)
-        setError(err instanceof Error ? err.message : 'Erro ao carregar usuário')
-      } finally {
-        setLoading(false)
-      }
+      )
     })
 
-    return unsubscribe
+    return () => {
+      unsubscribeAuth()
+      if (unsubscribeDoc) unsubscribeDoc()
+    }
   }, [])
 
   // Processa o retorno do login com Google via redirect (ver loginWithGoogle).
@@ -83,6 +127,7 @@ export const useAuth = () => {
             lastLogin: new Date()
           })
           await createDefaultCategories(result.user.uid)
+          await startTrial(result.user)
         } else {
           await setDoc(userRef, { lastLogin: new Date() }, { merge: true })
         }
@@ -114,6 +159,9 @@ export const useAuth = () => {
 
       // Create default categories
       await createDefaultCategories(result.user.uid)
+
+      // Inicia o trial de 7 dias (decidido no servidor, não no cliente)
+      await startTrial(result.user)
 
       setUser({
         uid: result.user.uid,

@@ -1,12 +1,18 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { isSubscriptionActive } from '../utils/subscriptionApi'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
+  // Algumas telas (Configurações, a própria tela de assinatura) precisam
+  // ficar acessíveis mesmo sem assinatura ativa, para o usuário poder
+  // gerenciar/assinar. Passe requireSubscription={false} nessas rotas.
+  requireSubscription?: boolean
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({ children, requireSubscription = true }: ProtectedRouteProps) => {
   const { user, loading } = useAuth()
+  const location = useLocation()
 
   if (loading) {
     return (
@@ -21,6 +27,10 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (!user) {
     return <Navigate to="/login" replace />
+  }
+
+  if (requireSubscription && !isSubscriptionActive(user) && location.pathname !== '/assinatura') {
+    return <Navigate to="/assinatura" replace />
   }
 
   return <>{children}</>

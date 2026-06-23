@@ -17,6 +17,8 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.24.0",
     "firebase": "^10.12.0",
+    "firebase-admin": "^12.3.1",
+    "mercadopago": "^2.0.15",
     "axios": "^1.7.7",
     "recharts": "^2.12.7",
     "date-fns": "^3.6.0",

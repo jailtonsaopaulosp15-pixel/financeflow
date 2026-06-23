@@ -22,6 +22,7 @@ const ReportsPage = lazy(() => import('./pages/ReportsPage').then(m => ({ defaul
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
 const AddTransactionPage = lazy(() => import('./pages/AddTransactionPage').then(m => ({ default: m.AddTransactionPage })))
 const ImportStatementPage = lazy(() => import('./pages/ImportStatementPage').then(m => ({ default: m.ImportStatementPage })))
+const AssinaturaPage = lazy(() => import('./pages/AssinaturaPage').then(m => ({ default: m.AssinaturaPage })))
 
 function PageLoader() {
   return (
@@ -52,6 +53,17 @@ function AppContent() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/recover-password" element={<RecoverPasswordPage />} />
+
+            {/* Tela de assinatura: precisa estar logado, mas não precisa de
+                assinatura ativa (é justamente onde o usuário assina). */}
+            <Route
+              path="/assinatura"
+              element={
+                <ProtectedRoute requireSubscription={false}>
+                  <AssinaturaPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Protected Routes */}
             <Route
@@ -97,7 +109,7 @@ function AppContent() {
             <Route
               path="/settings"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requireSubscription={false}>
                   <SettingsPage />
                 </ProtectedRoute>
               }

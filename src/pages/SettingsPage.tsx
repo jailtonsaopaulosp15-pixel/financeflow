@@ -1,15 +1,44 @@
 import { useState } from 'react'
-import { User, Mail, Lock, Moon, Sun, LogOut, Loader, Check } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { User, Mail, Lock, Moon, Sun, LogOut, Loader, Check, CreditCard } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
 import { useAppStore } from '../store/appStore'
+import { cancelSubscription } from '../utils/subscriptionApi'
+
+const daysLeft = (date?: Date) => {
+  if (!date) return 0
+  const diff = new Date(date).getTime() - Date.now()
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
+}
+
+const statusLabel = (status?: string, trialEndsAt?: Date) => {
+  switch (status) {
+    case 'trial':
+      return daysLeft(trialEndsAt) > 0
+        ? `Período de teste — ${daysLeft(trialEndsAt)} dia(s) restante(s)`
+        : 'Período de teste encerrado'
+    case 'authorized':
+      return 'Assinatura ativa'
+    case 'pending':
+      return 'Pagamento pendente de confirmação'
+    case 'paused':
+      return 'Assinatura pausada'
+    case 'cancelled':
+      return 'Assinatura cancelada'
+    default:
+      return 'Sem assinatura'
+  }
+}
 
 export const SettingsPage = () => {
   const { user, logout, resetPassword, updateUserName } = useAuth()
   const { theme, toggleTheme, addNotification } = useAppStore()
+  const navigate = useNavigate()
 
   const [displayName, setDisplayName] = useState(user?.displayName || '')
   const [savingName, setSavingName] = useState(false)
   const [sendingReset, setSendingReset] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
 
   const handleSaveName = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,6 +70,21 @@ export const SettingsPage = () => {
       setSendingReset(false)
     }
   }
+
+  const handleCancelSubscription = async () => {
+    if (!window.confirm('Tem certeza que deseja cancelar sua assinatura?')) return
+    setCancelling(true)
+    try {
+      await cancelSubscription()
+      addNotification('success', 'Assinatura cancelada com sucesso')
+    } catch (err) {
+      addNotification('error', err instanceof Error ? err.message : 'Erro ao cancelar assinatura')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  const hasActiveOrPending = user?.subscriptionStatus === 'authorized' || user?.subscriptionStatus === 'pending'
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -92,6 +136,35 @@ export const SettingsPage = () => {
               Salvar nome
             </button>
           </form>
+        </div>
+
+        {/* Subscription */}
+        <div className="card p-6 max-w-xl">
+          <h2 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+            <CreditCard size={20} />
+            Assinatura
+          </h2>
+          <p className="text-sm text-secondary mb-4">
+            {statusLabel(user?.subscriptionStatus, user?.trialEndsAt)}
+          </p>
+
+          {hasActiveOrPending ? (
+            <button
+              onClick={handleCancelSubscription}
+              disabled={cancelling}
+              className="flex items-center justify-center gap-2 border-2 border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 font-semibold py-3 px-6 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-70"
+            >
+              {cancelling && <Loader size={18} className="animate-spin" />}
+              Cancelar assinatura
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate('/assinatura')}
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-nubank-500 to-nubank-700 text-white font-semibold py-3 px-6 rounded-lg hover:shadow-lg transition-all"
+            >
+              Assinar agora — R$ 9,90/mês
+            </button>
+          )}
         </div>
 
         {/* Security */}

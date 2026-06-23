@@ -1,9 +1,14 @@
+export type SubscriptionStatus = 'trial' | 'pending' | 'authorized' | 'paused' | 'cancelled'
+
 export interface User {
   uid: string
   email: string
   displayName?: string
   photoURL?: string
   createdAt: Date
+  subscriptionStatus?: SubscriptionStatus
+  trialEndsAt?: Date
+  mpPreapprovalId?: string
 }
 
 export interface Category {

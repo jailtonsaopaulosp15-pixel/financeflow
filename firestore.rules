@@ -3,19 +3,35 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Cada usuário só pode ler/escrever seu próprio documento em /users/{userId}
-    // e qualquer subcoleção dentro dele (lancamentos, categories, etc).
+    // Campos de assinatura/trial: so o backend (Firebase Admin SDK, nas
+    // Netlify Functions) pode escrever. O Admin SDK ignora estas regras,
+    // entao isso so bloqueia o CLIENTE de se autoconceder uma assinatura
+    // "ativa" sem pagar.
+    function camposDeAssinatura() {
+      return ['subscriptionStatus', 'trialEndsAt', 'mpPreapprovalId'];
+    }
+
+    // Cada usuario so pode ler/escrever seu proprio documento em
+    // /users/{userId} e qualquer subcolecao dentro dele (lancamentos,
+    // categories, etc).
     match /users/{userId} {
-      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
-      // Criação do doc do usuário: só ele mesmo pode criar, com o próprio uid.
-      allow create: if request.auth != null && request.auth.uid == userId;
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      // Criacao do doc do usuario: so ele mesmo pode criar, com o proprio
+      // uid, e sem definir os campos de assinatura (isso e feito depois
+      // pelo start-trial via Admin SDK).
+      allow create: if request.auth != null && request.auth.uid == userId
+        && !request.resource.data.keys().hasAny(camposDeAssinatura());
+      // Atualizacao: o usuario pode mudar seus proprios dados, mas nunca os
+      // campos de assinatura/trial.
+      allow update: if request.auth != null && request.auth.uid == userId
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(camposDeAssinatura());
 
       match /{subcollection}/{docId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
     }
 
-    // Bloqueia qualquer outra coleção/documento não previsto explicitamente acima.
+    // Bloqueia qualquer outra colecao/documento nao previsto explicitamente acima.
     match /{document=**} {
       allow read, write: if false;
     }
