@@ -49,8 +49,9 @@ export const LoginPage = () => {
     setGoogleLoading(true)
     setLocalError(null)
     try {
-      const result = await loginWithGoogle()
-      if (result) addNotification('success', 'Login realizado com sucesso!')
+      // signInWithRedirect navega para fora do app; a tela só volta a executar
+      // código aqui se o redirect falhar antes de saber (ex.: rede offline).
+      await loginWithGoogle()
     } catch (err) {
       const errorMessage = authError || 'Erro ao entrar com Google'
       setLocalError(errorMessage)

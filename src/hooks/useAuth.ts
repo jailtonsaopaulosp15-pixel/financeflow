@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   GoogleAuthProvider,
   signOut,
   sendPasswordResetEmail,
@@ -14,6 +15,12 @@ import {
 import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { auth, db } from '../config/firebase'
 import { User } from '../types'
+
+// Garante que o resultado do redirect do Google só seja processado uma vez,
+// mesmo que vários componentes chamem useAuth() ao mesmo tempo após o
+// redirect de volta (App.jsx, LoginPage, SignupPage, etc. todos montam
+// useAuth() simultaneamente quando a página carrega).
+let redirectResultProcessed = false
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null)
@@ -48,6 +55,44 @@ export const useAuth = () => {
     })
 
     return unsubscribe
+  }, [])
+
+  // Processa o retorno do login com Google via redirect (ver loginWithGoogle).
+  // signInWithPopup não funciona de forma confiável no Safari/iOS quando o
+  // app está instalado como PWA (tela inicial) — o popup é bloqueado ou não
+  // retorna o foco para o app, resultando em "Erro ao entrar com Google".
+  // signInWithRedirect navega a própria página para o Google e volta, o que
+  // funciona em qualquer navegador, inclusive PWA standalone no iOS.
+  useEffect(() => {
+    if (redirectResultProcessed) return
+    redirectResultProcessed = true
+
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (!result) return
+
+        const userRef = doc(db, 'users', result.user.uid)
+        const userData = await getDoc(userRef)
+
+        if (!userData.exists()) {
+          await setDoc(userRef, {
+            email: result.user.email,
+            displayName: result.user.displayName || '',
+            photoURL: result.user.photoURL || null,
+            createdAt: new Date(),
+            lastLogin: new Date()
+          })
+          await createDefaultCategories(result.user.uid)
+        } else {
+          await setDoc(userRef, { lastLogin: new Date() }, { merge: true })
+        }
+
+        navigate('/dashboard')
+      })
+      .catch((err) => {
+        console.error('Erro ao processar retorno do login com Google:', err)
+        setError(getAuthErrorMessage(err))
+      })
   }, [])
 
   const signup = async (email: string, password: string, displayName: string) => {
@@ -109,32 +154,10 @@ export const useAuth = () => {
     try {
       setError(null)
       const provider = new GoogleAuthProvider()
-      const result = await signInWithPopup(auth, provider)
-
-      const userRef = doc(db, 'users', result.user.uid)
-      const userData = await getDoc(userRef)
-
-      if (!userData.exists()) {
-        // Primeiro login com Google: cria o documento do usuário e categorias padrão
-        await setDoc(userRef, {
-          email: result.user.email,
-          displayName: result.user.displayName || '',
-          photoURL: result.user.photoURL || null,
-          createdAt: new Date(),
-          lastLogin: new Date()
-        })
-        await createDefaultCategories(result.user.uid)
-      } else {
-        await setDoc(userRef, { lastLogin: new Date() }, { merge: true })
-      }
-
-      navigate('/dashboard')
-      return result.user
+      // Redireciona a página inteira para o Google e volta (em vez de popup).
+      // O resultado é tratado no efeito de getRedirectResult acima.
+      await signInWithRedirect(auth, provider)
     } catch (err: any) {
-      // Usuário fechou o popup — não é um erro real, não precisa exibir mensagem
-      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
-        return
-      }
       const errorMessage = getAuthErrorMessage(err)
       setError(errorMessage)
       throw err
