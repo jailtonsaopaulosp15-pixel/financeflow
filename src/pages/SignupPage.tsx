@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { Mail, Lock, User, Eye, EyeOff, Loader } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth'
@@ -17,6 +17,18 @@ export const SignupPage = () => {
   const [googleLoading, setGoogleLoading] = useState(false)
   const { user, error: authError, signup, loginWithGoogle } = useAuth()
   const { addNotification } = useAppStore()
+
+  // O cadastro com Google via redirect volta para esta página depois que o
+  // usuário autentica no Google. Se algo falhar nesse retorno (ex.: domínio
+  // não autorizado no Firebase), o erro fica só no estado `authError` do
+  // useAuth — sem isso, a tela ficava "presa" sem nenhuma mensagem.
+  useEffect(() => {
+    if (authError) {
+      setGoogleLoading(false)
+      setLocalError(authError)
+      addNotification('error', authError)
+    }
+  }, [authError])
 
   if (user) {
     return <Navigate to="/dashboard" replace />

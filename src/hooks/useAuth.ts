@@ -235,6 +235,7 @@ const getAuthErrorMessage = (error: any): string => {
     'auth/too-many-requests': 'Muitas tentativas de login. Tente novamente mais tarde',
     'auth/popup-blocked': 'O popup de login foi bloqueado pelo navegador. Permita popups e tente novamente',
     'auth/account-exists-with-different-credential': 'Já existe uma conta com este e-mail usando outro método de login',
+    'auth/unauthorized-domain': 'Este domínio não está autorizado a fazer login com Google. Adicione-o em Firebase Console > Authentication > Settings > Authorized domains.',
   }
 
   return errorMessages[errorCode] || 'Erro ao processar requisição'
