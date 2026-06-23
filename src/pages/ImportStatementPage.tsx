@@ -1,8 +1,7 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Upload, FileText, Loader, Check, X, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
-import { useTransactions } from '../hooks/useTransactions'
+import { useTransactions } from '../contexts/DataProvider'
 import { useAppStore } from '../store/appStore'
 import { extractPdfLines, parseStatementLines, ParsedTransaction } from '../utils/statementParser'
 
@@ -11,8 +10,7 @@ const formatCurrency = (value: number) =>
 
 export const ImportStatementPage = () => {
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const { addTransaction } = useTransactions(user?.uid || null)
+  const { addTransaction } = useTransactions()
   const { addNotification } = useAppStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
 

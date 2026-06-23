@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useAppStore } from './store/appStore'
 import { useAuth } from './hooks/useAuth'
+import { DataProvider } from './contexts/DataProvider'
 
 // Components
 import { Header } from './components/Header'
@@ -45,6 +46,7 @@ function AppContent() {
         {/* Main Content */}
         <main className={`max-w-2xl mx-auto ${user && !isAuthPage ? 'pb-24' : ''}`}>
           <Suspense fallback={<PageLoader />}>
+          <DataProvider userId={user?.uid || null}>
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -113,6 +115,7 @@ function AppContent() {
             <Route path="/" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </DataProvider>
           </Suspense>
         </main>
 

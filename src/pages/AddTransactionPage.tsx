@@ -1,16 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, DollarSign, FileUp, Plus } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
-import { useTransactions } from '../hooks/useTransactions'
-import { useCategories } from '../hooks/useCategories'
+import { useTransactions, useCategories } from '../contexts/DataProvider'
 import { useAppStore } from '../store/appStore'
 
 export const AddTransactionPage = () => {
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const { addTransaction } = useTransactions(user?.uid || null)
-  const { categories } = useCategories(user?.uid || null)
+  const { addTransaction } = useTransactions()
+  const { categories } = useCategories()
   const { addNotification } = useAppStore()
 
   const [formData, setFormData] = useState({

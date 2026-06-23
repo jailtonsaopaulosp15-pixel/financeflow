@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { TrendingUp, TrendingDown, ArrowRight, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { useAuth } from '../hooks/useAuth'
-import { useTransactions } from '../hooks/useTransactions'
+import { useTransactions } from '../contexts/DataProvider'
 import { useAppStore } from '../store/appStore'
 import { formatCurrency, getMonthlyData } from '../utils/finance'
 import { format, startOfMonth, endOfMonth, isToday } from 'date-fns'
@@ -15,9 +14,8 @@ const CATEGORY_ICONS: Record<string, string> = {
 }
 
 export const DashboardPage = () => {
-  const { user } = useAuth()
   const { theme } = useAppStore()
-  const { transactions } = useTransactions(user?.uid || null)
+  const { transactions } = useTransactions()
   const [stats, setStats] = useState({
     currentBalance: 0,
     monthlyIncome: 0,

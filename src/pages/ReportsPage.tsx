@@ -3,9 +3,7 @@ import { Download, TrendingUp, TrendingDown, Wallet } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
-import { useAuth } from '../hooks/useAuth'
-import { useTransactions } from '../hooks/useTransactions'
-import { useCategories } from '../hooks/useCategories'
+import { useTransactions, useCategories } from '../contexts/DataProvider'
 import { useAppStore } from '../store/appStore'
 import { formatCurrency } from '../utils/finance'
 
@@ -25,10 +23,9 @@ const monthOptions = () => {
 }
 
 export const ReportsPage = () => {
-  const { user } = useAuth()
   const { theme, addNotification } = useAppStore()
-  const { transactions, loading } = useTransactions(user?.uid || null)
-  const { categories } = useCategories(user?.uid || null)
+  const { transactions, loading } = useTransactions()
+  const { categories } = useCategories()
 
   const months = useMemo(monthOptions, [])
   const [selectedMonth, setSelectedMonth] = useState(months[0].value)

@@ -1,9 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Check, X, Loader } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
-import { useTransactions } from '../hooks/useTransactions'
-import { useCategories } from '../hooks/useCategories'
+import { useTransactions, useCategories } from '../contexts/DataProvider'
 import { useAppStore } from '../store/appStore'
 import { usePagination } from '../hooks/usePagination'
 import { Pagination } from '../components/Pagination'
@@ -26,9 +24,8 @@ const monthOptions = () => {
 
 export const IncomesPage = () => {
   const navigate = useNavigate()
-  const { user } = useAuth()
-  const { transactions, loading, updateTransaction, deleteTransaction } = useTransactions(user?.uid || null)
-  const { categories } = useCategories(user?.uid || null)
+  const { transactions, loading, updateTransaction, deleteTransaction } = useTransactions()
+  const { categories } = useCategories()
   const { addNotification } = useAppStore()
 
   const months = useMemo(monthOptions, [])
