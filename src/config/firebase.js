@@ -12,12 +12,17 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig)
+// Sem apiKey, getAuth() lança uma exceção síncrona na importação do módulo
+// (Firebase: Error (auth/invalid-api-key)) que derruba a árvore de render do
+// React inteira, deixando a tela em branco em qualquer rota. isFirebaseConfigured
+// permite ao app detectar isso e mostrar uma mensagem de configuração pendente
+// em vez de quebrar silenciosamente.
+export const isFirebaseConfigured = Boolean(firebaseConfig.apiKey)
 
-// Initialize Firebase Services
-export const auth = getAuth(app)
-export const db = getFirestore(app)
-export const storage = getStorage(app)
+const app = isFirebaseConfigured ? initializeApp(firebaseConfig) : null
+
+export const auth = app ? getAuth(app) : null
+export const db = app ? getFirestore(app) : null
+export const storage = app ? getStorage(app) : null
 
 export default app

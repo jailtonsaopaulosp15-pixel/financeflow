@@ -20,7 +20,7 @@ export const useCategories = (userId: string | null) => {
 
   // Real-time listener for categories
   useEffect(() => {
-    if (!userId) {
+    if (!userId || !db) {
       setCategories([])
       setLoading(false)
       return
@@ -68,7 +68,7 @@ export const useCategories = (userId: string | null) => {
     icon: string,
     color: string
   ) => {
-    if (!userId) throw new Error('Usuário não autenticado')
+    if (!userId || !db) throw new Error('Usuário não autenticado')
 
     try {
       setError(null)
@@ -92,7 +92,7 @@ export const useCategories = (userId: string | null) => {
     categoryId: string,
     updates: Partial<Category>
   ) => {
-    if (!userId) throw new Error('Usuário não autenticado')
+    if (!userId || !db) throw new Error('Usuário não autenticado')
 
     try {
       setError(null)
@@ -114,7 +114,7 @@ export const useCategories = (userId: string | null) => {
   }, [userId])
 
   const deleteCategory = useCallback(async (categoryId: string) => {
-    if (!userId) throw new Error('Usuário não autenticado')
+    if (!userId || !db) throw new Error('Usuário não autenticado')
 
     try {
       setError(null)

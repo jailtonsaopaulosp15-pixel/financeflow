@@ -1,10 +1,22 @@
 import { auth } from '../config/firebase'
 import { User } from '../types'
 
+// E-mails de desenvolvedor/admin (configurados em VITE_ADMIN_EMAILS, separados
+// por vírgula) têm acesso liberado sem precisar de trial ou assinatura no
+// Mercado Pago. Útil para testar o app durante o desenvolvimento.
+const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || '')
+  .split(',')
+  .map((email: string) => email.trim().toLowerCase())
+  .filter(Boolean)
+
+const isAdminEmail = (email?: string | null): boolean =>
+  !!email && ADMIN_EMAILS.includes(email.toLowerCase())
+
 // Decide se o usuário pode acessar as funcionalidades do app: trial ainda
 // válido (dentro dos 7 dias) ou assinatura autorizada no Mercado Pago.
 export const isSubscriptionActive = (user: User | null | undefined): boolean => {
   if (!user) return false
+  if (isAdminEmail(user.email)) return true
   if (user.subscriptionStatus === 'authorized') return true
   if (user.subscriptionStatus === 'trial' && user.trialEndsAt) {
     return new Date(user.trialEndsAt).getTime() > Date.now()
@@ -13,7 +25,7 @@ export const isSubscriptionActive = (user: User | null | undefined): boolean => 
 }
 
 const callFunction = async (path: string): Promise<any> => {
-  if (!auth.currentUser) {
+  if (!auth?.currentUser) {
     throw new Error('Usuário não autenticado')
   }
   const idToken = await auth.currentUser.getIdToken()
