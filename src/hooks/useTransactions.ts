@@ -22,7 +22,7 @@ export const useTransactions = (userId: string | null) => {
 
   // Real-time listener for transactions
   useEffect(() => {
-    if (!userId) {
+    if (!userId || !db) {
       setTransactions([])
       setLoading(false)
       return
@@ -75,7 +75,7 @@ export const useTransactions = (userId: string | null) => {
     notes?: string,
     attachments?: string[]
   ) => {
-    if (!userId) throw new Error('Usuário não autenticado')
+    if (!userId || !db) throw new Error('Usuário não autenticado')
 
     try {
       setError(null)
@@ -104,7 +104,7 @@ export const useTransactions = (userId: string | null) => {
     transactionId: string,
     updates: Partial<Transaction>
   ) => {
-    if (!userId) throw new Error('Usuário não autenticado')
+    if (!userId || !db) throw new Error('Usuário não autenticado')
 
     try {
       setError(null)
@@ -132,7 +132,7 @@ export const useTransactions = (userId: string | null) => {
   }, [userId])
 
   const deleteTransaction = useCallback(async (transactionId: string) => {
-    if (!userId) throw new Error('Usuário não autenticado')
+    if (!userId || !db) throw new Error('Usuário não autenticado')
 
     try {
       setError(null)
@@ -148,7 +148,7 @@ export const useTransactions = (userId: string | null) => {
     startDate: Date,
     endDate: Date
   ): Promise<Transaction[]> => {
-    if (!userId) return []
+    if (!userId || !db) return []
 
     try {
       const q = query(
@@ -177,7 +177,7 @@ export const useTransactions = (userId: string | null) => {
     startDate?: Date,
     endDate?: Date
   ): Promise<Transaction[]> => {
-    if (!userId) return []
+    if (!userId || !db) return []
 
     try {
       let q

@@ -222,7 +222,7 @@ export const LoginPage = () => {
           {/* Sign Up Link */}
           <Link
             to="/signup"
-            className="w-full py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-center"
+            className="block w-full py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-center"
           >
             Criar conta
           </Link>

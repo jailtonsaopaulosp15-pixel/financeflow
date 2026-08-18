@@ -13,7 +13,7 @@ import {
   User as FirebaseUser
 } from 'firebase/auth'
 import { doc, setDoc, getDoc, onSnapshot, Timestamp } from 'firebase/firestore'
-import { auth, db } from '../config/firebase'
+import { auth, db, isFirebaseConfigured } from '../config/firebase'
 import { User } from '../types'
 
 // Garante que o resultado do redirect do Google só seja processado uma vez,
@@ -55,6 +55,12 @@ export const useAuth = () => {
   // backend — por exemplo, quando o webhook do Mercado Pago atualiza
   // subscriptionStatus depois que o usuário autoriza o pagamento.
   useEffect(() => {
+    if (!isFirebaseConfigured || !auth || !db) {
+      setLoading(false)
+      return
+    }
+
+    const firestore = db
     let unsubscribeDoc: (() => void) | undefined
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
@@ -70,7 +76,7 @@ export const useAuth = () => {
       }
 
       unsubscribeDoc = onSnapshot(
-        doc(db, 'users', firebaseUser.uid),
+        doc(firestore, 'users', firebaseUser.uid),
         (snap) => {
           if (snap.exists()) {
             const data = snap.data()
@@ -108,14 +114,16 @@ export const useAuth = () => {
   // signInWithRedirect navega a própria página para o Google e volta, o que
   // funciona em qualquer navegador, inclusive PWA standalone no iOS.
   useEffect(() => {
+    if (!isFirebaseConfigured || !auth || !db) return
     if (redirectResultProcessed) return
     redirectResultProcessed = true
+    const firestore = db
 
     getRedirectResult(auth)
       .then(async (result) => {
         if (!result) return
 
-        const userRef = doc(db, 'users', result.user.uid)
+        const userRef = doc(firestore, 'users', result.user.uid)
         const userData = await getDoc(userRef)
 
         if (!userData.exists()) {
@@ -143,6 +151,7 @@ export const useAuth = () => {
   const signup = async (email: string, password: string, displayName: string) => {
     try {
       setError(null)
+      if (!isFirebaseConfigured || !auth || !db) throw { code: 'app/not-configured' }
       const result = await createUserWithEmailAndPassword(auth, email, password)
       
       // Update profile
@@ -182,6 +191,7 @@ export const useAuth = () => {
   const login = async (email: string, password: string) => {
     try {
       setError(null)
+      if (!isFirebaseConfigured || !auth || !db) throw { code: 'app/not-configured' }
       const result = await signInWithEmailAndPassword(auth, email, password)
       
       // Update last login
@@ -201,6 +211,7 @@ export const useAuth = () => {
   const loginWithGoogle = async () => {
     try {
       setError(null)
+      if (!isFirebaseConfigured || !auth) throw { code: 'app/not-configured' }
       const provider = new GoogleAuthProvider()
       // Redireciona a página inteira para o Google e volta (em vez de popup).
       // O resultado é tratado no efeito de getRedirectResult acima.
@@ -215,6 +226,7 @@ export const useAuth = () => {
   const logout = async () => {
     try {
       setError(null)
+      if (!auth) throw { code: 'app/not-configured' }
       await signOut(auth)
       setUser(null)
       navigate('/login')
@@ -228,6 +240,7 @@ export const useAuth = () => {
   const resetPassword = async (email: string) => {
     try {
       setError(null)
+      if (!isFirebaseConfigured || !auth) throw { code: 'app/not-configured' }
       await sendPasswordResetEmail(auth, email)
       return true
     } catch (err) {
@@ -240,7 +253,7 @@ export const useAuth = () => {
   const updateUserName = async (displayName: string) => {
     try {
       setError(null)
-      if (!auth.currentUser) throw new Error('Usuário não autenticado')
+      if (!auth?.currentUser || !db) throw new Error('Usuário não autenticado')
 
       await updateProfile(auth.currentUser, { displayName })
       await setDoc(doc(db, 'users', auth.currentUser.uid), { displayName }, { merge: true })
@@ -284,6 +297,7 @@ const getAuthErrorMessage = (error: any): string => {
     'auth/popup-blocked': 'O popup de login foi bloqueado pelo navegador. Permita popups e tente novamente',
     'auth/account-exists-with-different-credential': 'Já existe uma conta com este e-mail usando outro método de login',
     'auth/unauthorized-domain': 'Este domínio não está autorizado a fazer login com Google. Adicione-o em Firebase Console > Authentication > Settings > Authorized domains.',
+    'app/not-configured': 'O app ainda não foi configurado: faltam as credenciais do Firebase. Consulte o SETUP_GUIDE.md.',
   }
 
   return errorMessages[errorCode] || 'Erro ao processar requisição'
@@ -305,6 +319,7 @@ const createDefaultCategories = async (userId: string) => {
   ]
 
   try {
+    if (!db) return
     for (const category of defaultCategories) {
       await setDoc(doc(db, 'users', userId, 'categories', category.name), {
         ...category,
