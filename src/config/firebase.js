@@ -17,7 +17,7 @@ const app = initializeApp(firebaseConfig)
 
 // Initialize Firebase Services
 export const auth = getAuth(app)
-export const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true })
+export const db = initializeFirestore(app, { experimentalForceLongPolling: true })
 export const storage = getStorage(app)
 
 export default app
