@@ -167,9 +167,20 @@ export const ExpensesPage = () => {
           {loading ? (
             <div className="p-8 text-center text-gray-500 dark:text-gray-400">Carregando...</div>
           ) : filtered.length === 0 ? (
-            <div className="p-8 text-center text-gray-600 dark:text-gray-400">
-              Nenhuma despesa encontrada para este período.
+            <div className="p-10 flex flex-col items-center gap-4 text-center">
+            <span className="text-5xl">📋</span>
+            <div>
+              <p className="font-semibold text-gray-700 dark:text-gray-200 text-lg">Nenhuma despesa ainda</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Registre seus gastos para acompanhar suas finanças</p>
             </div>
+            <button
+              onClick={() => navigate('/add-transaction')}
+              className="flex items-center gap-2 bg-red-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-red-700 transition-all"
+            >
+              <Plus size={18} />
+              Adicionar despesa
+            </button>
+          </div>
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {pageItems.map((t) => (

@@ -81,8 +81,9 @@ export const DashboardPage = () => {
         <div className="bg-gradient-to-br from-nubank-500 via-purple-600 to-fuchsia-700 rounded-3xl p-6 text-white shadow-xl">
           <div className="flex items-center justify-between mb-2">
             <div>
-              <p className="text-xs font-semibold tracking-wider text-purple-100 uppercase">Despesas do mês</p>
-              <h2 className="text-3xl font-bold mt-1">{formatCurrency(stats.monthlyExpense)}</h2>
+              <p className="text-xs font-semibold tracking-wider text-purple-100 uppercase">Saldo atual</p>
+              <h2 className="text-3xl font-bold mt-1">{formatCurrency(stats.currentBalance)}</h2>
+              <p className="text-sm text-purple-200 mt-0.5">Despesas do mês: {formatCurrency(stats.monthlyExpense)}</p>
             </div>
             <div className="relative w-20 h-20 shrink-0">
               <svg width="80" height="80" viewBox="0 0 80 80">

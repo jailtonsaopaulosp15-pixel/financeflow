@@ -180,7 +180,7 @@ export const ReportsPage = () => {
                   <Wallet className="text-purple-600" size={20} />
                 </div>
                 <div>
-                  <p className="text-sm text-secondary">Saldo {balance >= 0 ? '(economia ' + savingsRate + '%)' : ''}</p>
+                  <p className="text-sm text-secondary">{balance >= 0 ? `Taxa de poupança: ${savingsRate}%` : 'Saldo do mês'}</p>
                   <p className={`text-lg font-bold ${balance >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
                     {formatCurrency(balance)}
                   </p>

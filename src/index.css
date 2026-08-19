@@ -159,7 +159,7 @@ input[type='number'] {
   }
 
   .page-content {
-    @apply px-6 pb-6;
+    @apply px-6 pb-28;
   }
 }
 
