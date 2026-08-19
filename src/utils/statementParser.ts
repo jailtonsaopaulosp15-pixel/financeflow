@@ -5,9 +5,11 @@
 
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf'
 
-// Worker servido via CDN para evitar problemas de bundling com Vite.
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+// Worker empacotado pelo Vite (mesma origem e versao identica a do pacote),
+// evitando travamento quando o CDN externo nao carrega.
+import pdfWorkerSrc from 'pdfjs-dist/legacy/build/pdf.worker.min.js?url'
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSrc
 
 export interface ParsedTransaction {
   date: Date
